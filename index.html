@@ -95,19 +95,11 @@
             border-left: 5px solid rgb(0, 100, 60);
         }
 
-        /* スタッフグリッド */
-        .staff-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 600px;
-        }
-
-        /* 選手グリッド */
+        /* グリッド共通 */
         .player-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
         }
 
         /* カード */
@@ -395,38 +387,34 @@
             <p class="welcome-msg">ぜひ選手の顔と名前を覚えてください！<br>クイズも用意しました。</p>
             <div class="header-buttons">
                 <a href="quiz.html" class="slideshow-link" style="background: #e67e22;">これ誰？クイズ</a>
-                <a href="player_intro.html" class="slideshow-link">スライドショーを見る</a>
             </div>
         </div>
 
-        <!-- スタッフ -->
+        <!-- スタッフ & 選手 -->
         <div class="section">
-            <h2 class="section-title">STAFF</h2>
-            <div class="staff-grid">
+            <h2 class="section-title">STAFF & PLAYERS</h2>
+            <div class="player-grid">
                 <!-- 野口監督 -->
-                <div class="card staff-card" onclick="openModal('野口監督_trimmed.jpg', '', '野口監督', '', '監督')">
+                <div class="card" onclick="openModal('野口監督_trimmed.jpg', '', '野口監督', '', '監督')">
                     <img src="野口監督_trimmed.jpg" alt="野口監督" class="director-img">
                     <div class="card-info">
-                        <div class="card-role">監督</div>
-                        <div class="card-name-kanji">野口監督</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">野口監督</div>
+                            <div class="card-name-romaji">監督</div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 川﨑コーチ -->
-                <div class="card staff-card" onclick="openModal('その他/川﨑コーチ.jpg', '', '川﨑コーチ', '', 'コーチ')">
+                <div class="card" onclick="openModal('その他/川﨑コーチ.jpg', '', '川﨑コーチ', '', 'コーチ')">
                     <img src="その他/川﨑コーチ.jpg" alt="川﨑コーチ">
                     <div class="card-info">
-                        <div class="card-role">コーチ</div>
-                        <div class="card-name-kanji">川﨑コーチ</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">川﨑コーチ</div>
+                            <div class="card-name-romaji">コーチ</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- 選手 -->
-        <div class="section">
-            <h2 class="section-title">PLAYERS</h2>
-            <div class="player-grid">
                 <!-- #2 優聖 -->
                 <div class="card" onclick="openModal('選手紹介用/1773492968182.jpg', '2', '優聖', 'Yusei')">
                     <span class="age-label u9">U9</span>
