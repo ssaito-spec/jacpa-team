@@ -507,12 +507,14 @@
             { number: '', name: '川﨑コーチ', romaji: '', image: 'その他/川﨑コーチ.jpg', role: 'コーチ' }
         ];
 
+        const QUIZ_SIZE = 5;
         let quizMembers = [];
         let quizMode = 'name'; // 'name' or 'number'
         let currentQ = 0;
         let score = 0;
         let results = [];
         let answered = false;
+        let wrongPool = []; // 間違えた選手を優先出題
 
         function shuffle(arr) {
             const a = [...arr];
@@ -533,9 +535,29 @@
             backLink.onclick = null;
         }
 
+        function pickQuizMembers() {
+            // 間違えた選手を優先的に入れる
+            let picked = [];
+            if (wrongPool.length > 0) {
+                const priority = shuffle([...wrongPool]).slice(0, QUIZ_SIZE);
+                picked = [...priority];
+                // 間違えプールから出題した分は消す
+                picked.forEach(p => {
+                    const idx = wrongPool.findIndex(w => w.name === p.name);
+                    if (idx >= 0) wrongPool.splice(idx, 1);
+                });
+            }
+            // 残りをランダムで埋める
+            if (picked.length < QUIZ_SIZE) {
+                const rest = shuffle(players.filter(p => !picked.some(q => q.name === p.name)));
+                picked = [...picked, ...rest.slice(0, QUIZ_SIZE - picked.length)];
+            }
+            return shuffle(picked);
+        }
+
         function startQuiz(mode) {
             quizMode = mode;
-            quizMembers = shuffle([...players]);
+            quizMembers = pickQuizMembers();
             currentQ = 0;
             score = 0;
             results = [];
@@ -622,6 +644,14 @@
                 correct: isCorrect
             });
 
+            // 間違えた選手を次回優先プールに追加
+            if (!isCorrect) {
+                const m = quizMembers[currentQ];
+                if (!wrongPool.some(w => w.name === m.name)) {
+                    wrongPool.push(m);
+                }
+            }
+
             // ボタンの状態更新
             const buttons = document.querySelectorAll('.choice-btn');
             buttons.forEach(b => {
@@ -678,16 +708,13 @@
             let message, sub;
             if (pct === 100) {
                 message = 'パーフェクト！';
-                sub = 'すごい！全員覚えとるやん！';
-            } else if (pct >= 80) {
-                message = 'すごい！';
-                sub = 'ほとんど覚えとるね！';
-            } else if (pct >= 50) {
+                sub = '全問正解！次もいける？';
+            } else if (pct >= 60) {
                 message = 'いい感じ！';
-                sub = 'もうちょっとで全員覚えれるよ！';
+                sub = '間違えた選手は次に優先で出るよ！';
             } else {
                 message = 'がんばろう！';
-                sub = '一覧ページで確認してもう1回やってみよう！';
+                sub = '間違えた選手は次に優先で出るよ！';
             }
 
             // 間違えた問題のリスト
@@ -715,7 +742,7 @@
                 <div class="result-message">${message}</div>
                 <div class="result-sub">${sub}</div>
                 ${wrongListHTML}
-                <button class="retry-btn" onclick="startQuiz(quizMode)">もう1回やる</button>
+                <button class="retry-btn" onclick="startQuiz(quizMode)">次の5問！</button>
                 <button class="home-btn" onclick="goToTop()">別のクイズ</button>
                 <button class="home-btn" onclick="location.href='index.html'" style="margin-top:5px;">選手一覧に戻る</button>
             `;
