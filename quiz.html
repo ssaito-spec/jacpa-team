@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JACPA東京FC - これ誰？クイズ</title>
+    <title>JACPA東京FC - クイズ</title>
     <style>
         * {
             margin: 0;
@@ -407,18 +407,18 @@
 
         <div class="header">
             <img class="logo" src="その他/logo.jpeg" alt="JACPA東京FC">
-            <h1>これ誰？クイズ</h1>
-            <div class="subtitle">JACPA東京FC 2025-2026</div>
+            <h1>クイズ</h1>
+            <div class="subtitle">JACPA東京FC</div>
         </div>
 
         <!-- スタート画面 -->
         <div id="start-screen" class="start-screen">
             <div class="emoji">&#9917;</div>
-            <h2>選手の名前を覚えよう！</h2>
-            <p>写真を見て、4つの選択肢から<br>正しい名前を選んでね</p>
+            <h2>選手を覚えよう！</h2>
+            <p>写真を見て4択から答えてね</p>
             <div class="mode-select">
-                <button class="mode-btn primary" onclick="startQuiz('players')">選手だけ（19人）</button>
-                <button class="mode-btn secondary" onclick="startQuiz('all')">スタッフ込み（21人）</button>
+                <button class="mode-btn primary" onclick="startQuiz('name')">これ誰？</button>
+                <button class="mode-btn secondary" onclick="startQuiz('number')">背番号わかる？</button>
             </div>
         </div>
 
@@ -475,6 +475,7 @@
         ];
 
         let quizMembers = [];
+        let quizMode = 'name'; // 'name' or 'number'
         let currentQ = 0;
         let score = 0;
         let results = [];
@@ -490,7 +491,8 @@
         }
 
         function startQuiz(mode) {
-            quizMembers = mode === 'all' ? shuffle([...staff, ...players]) : shuffle([...players]);
+            quizMode = mode;
+            quizMembers = shuffle([...players]);
             currentQ = 0;
             score = 0;
             results = [];
@@ -517,26 +519,31 @@
 
             // ラベル
             const label = document.querySelector('.question-label');
-            if (member.role) {
-                label.textContent = 'この人はだれ？';
-            } else {
-                label.textContent = 'この選手はだれ？';
-            }
+            label.textContent = quizMode === 'number' ? '背番号は？' : 'この選手はだれ？';
 
-            // 選択肢を作る（正解1 + 同カテゴリからダミー3）
-            const sameCategory = member.role ? [...staff] : [...players];
-            const wrongChoices = shuffle(sameCategory.filter(m => m.name !== member.name)).slice(0, 3);
+            // 選択肢を作る（正解1 + ダミー3）
+            const wrongChoices = shuffle(players.filter(m => m.name !== member.name)).slice(0, 3);
             const choices = shuffle([member, ...wrongChoices]);
 
             const choicesDiv = document.getElementById('choices');
-            const labels = ['A', 'B', 'C', 'D'];
-            choicesDiv.innerHTML = choices.map((c, i) => {
-                const furigana = c.kana ? `<span style="font-size:12px; color:#999; margin-left:8px;">${c.kana}</span>` : '';
-                return `<button class="choice-btn" onclick="answer(this, '${c.name}', '${member.name}')" data-name="${c.name}">
-                    <span class="choice-label">${labels[i]}</span>
-                    ${c.name}${furigana}
-                </button>`;
-            }).join('');
+            const lbls = ['A', 'B', 'C', 'D'];
+
+            if (quizMode === 'number') {
+                choicesDiv.innerHTML = choices.map((c, i) => {
+                    return `<button class="choice-btn" onclick="answer(this, '${c.number}', '${member.number}')" data-name="${c.number}">
+                        <span class="choice-label">${lbls[i]}</span>
+                        <span style="font-size:24px; font-weight:900; font-family:Impact,sans-serif;">${c.number}</span>
+                    </button>`;
+                }).join('');
+            } else {
+                choicesDiv.innerHTML = choices.map((c, i) => {
+                    const furigana = c.kana ? `<span style="font-size:12px; color:#999; margin-left:8px;">${c.kana}</span>` : '';
+                    return `<button class="choice-btn" onclick="answer(this, '${c.name}', '${member.name}')" data-name="${c.name}">
+                        <span class="choice-label">${lbls[i]}</span>
+                        ${c.name}${furigana}
+                    </button>`;
+                }).join('');
+            }
 
             // フィードバック非表示
             document.getElementById('feedback').classList.remove('show');
@@ -576,7 +583,8 @@
                 feedbackText.className = 'feedback-text correct';
             } else {
                 const correctMember = quizMembers[currentQ];
-                feedbackText.textContent = `残念... 正解は「${correctMember.name}」`;
+                const ans = quizMode === 'number' ? `#${correctMember.number}` : correctMember.name;
+                feedbackText.textContent = `残念... 正解は「${ans}」`;
                 feedbackText.className = 'feedback-text wrong';
             }
 
