@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JACPA東京FC 選手一覧 2025-2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 背景の透かしロゴ */
+        .bg-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            max-width: 800px;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ヘッダー */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid rgb(0, 100, 60);
+        }
+
+        .header .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .header .season {
+            font-size: 20px;
+            color: #666;
+            font-family: 'Helvetica Neue', sans-serif;
+        }
+
+        .welcome-msg {
+            font-size: 16px;
+            color: #555;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .header-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* セクション */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: rgb(0, 100, 60);
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 5px solid rgb(0, 100, 60);
+        }
+
+        /* スタッフグリッド */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 600px;
+        }
+
+        /* 選手グリッド */
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* カード */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .card {
+            position: relative;
+        }
+
+        .age-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            z-index: 2;
+        }
+
+        .age-label.u9 {
+            background: rgb(0, 100, 60);
+        }
+
+        .age-label.u8 {
+            background: #e67e22;
+        }
+
+        /* 野口監督の写真を左側にトリミング */
+        .director-img {
+            object-position: left top !important;
+        }
+
+        .card-info {
+            padding: 15px;
+            background: linear-gradient(135deg, #fafafa 0%, #fff 100%);
+            border-top: 3px solid rgb(0, 100, 60);
+        }
+
+        .card-number {
+            font-size: 36px;
+            font-weight: 900;
+            color: #1a1a1a;
+            font-family: Impact, 'Helvetica Neue', sans-serif;
+            transform: skewX(-8deg);
+            display: inline-block;
+            text-shadow: 2px 2px 0 rgb(0, 100, 60);
+            line-height: 1;
+        }
+
+        .card-name {
+            margin-top: 8px;
+        }
+
+        .card-name-kanji {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .card-name-romaji {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        /* スタッフカード */
+        .staff-card .card-info {
+            text-align: center;
+        }
+
+        .staff-card .card-role {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .staff-card .card-name-kanji {
+            font-size: 24px;
+        }
+
+        /* フッター */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 500px;
+            max-height: 90vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 60vh;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .modal-image.crop-left {
+            object-position: left top;
+        }
+
+        .modal-info {
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(135deg, #fafafa 0%, #fff 100%);
+            border-top: 4px solid rgb(0, 100, 60);
+        }
+
+        .modal-number {
+            font-size: 72px;
+            font-weight: 900;
+            color: #1a1a1a;
+            font-family: Impact, 'Helvetica Neue', sans-serif;
+            transform: skewX(-10deg);
+            line-height: 1;
+            text-shadow: 3px 3px 0 rgb(0, 100, 60);
+        }
+
+        .modal-name-area {
+            flex: 1;
+        }
+
+        .modal-name-kanji {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .modal-name-romaji {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .modal-role {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* 前後ナビゲーション */
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .modal-nav:hover {
+            background: #fff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-prev {
+            left: 20px;
+        }
+
+        .modal-next {
+            right: 20px;
+        }
+
+        /* リンク */
+        .slideshow-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: rgb(0, 100, 60);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .slideshow-link:hover {
+            background: rgb(0, 80, 48);
+        }
+    </style>
+</head>
+<body>
+    <img class="bg-watermark" src="その他/logo.jpeg" alt="">
+
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <img class="logo" src="その他/logo.jpeg" alt="JACPA東京FC">
+            <h1>Welcome to JACPA</h1>
+            <div class="season">2025-2026 SEASON</div>
+            <p class="welcome-msg">ぜひ選手の顔と名前を覚えてください！<br>練習問題も用意しました。</p>
+            <div class="header-buttons">
+                <a href="quiz.html" class="slideshow-link" style="background: #e67e22;">これ誰？クイズ</a>
+                <a href="player_intro.html" class="slideshow-link">スライドショーを見る</a>
+            </div>
+        </div>
+
+        <!-- スタッフ -->
+        <div class="section">
+            <h2 class="section-title">STAFF</h2>
+            <div class="staff-grid">
+                <!-- 野口監督 -->
+                <div class="card staff-card" onclick="openModal('野口監督_trimmed.jpg', '', '野口監督', '', '監督')">
+                    <img src="野口監督_trimmed.jpg" alt="野口監督" class="director-img">
+                    <div class="card-info">
+                        <div class="card-role">監督</div>
+                        <div class="card-name-kanji">野口監督</div>
+                    </div>
+                </div>
+
+                <!-- 川﨑コーチ -->
+                <div class="card staff-card" onclick="openModal('その他/川﨑コーチ.jpg', '', '川﨑コーチ', '', 'コーチ')">
+                    <img src="その他/川﨑コーチ.jpg" alt="川﨑コーチ">
+                    <div class="card-info">
+                        <div class="card-role">コーチ</div>
+                        <div class="card-name-kanji">川﨑コーチ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 選手 -->
+        <div class="section">
+            <h2 class="section-title">PLAYERS</h2>
+            <div class="player-grid">
+                <!-- #2 優聖 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492968182.jpg', '2', '優聖', 'Yusei')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492968182.jpg" alt="優聖">
+                    <div class="card-info">
+                        <div class="card-number">2</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">優聖</div>
+                            <div class="card-name-romaji">Yusei</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #3 旺佑 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492968683.jpg', '3', '旺佑', 'Osuke')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492968683.jpg" alt="旺佑">
+                    <div class="card-info">
+                        <div class="card-number">3</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">旺佑</div>
+                            <div class="card-name-romaji">Osuke</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #4 一翔 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492969258.jpg', '4', '一翔', 'Kazuto')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492969258.jpg" alt="一翔">
+                    <div class="card-info">
+                        <div class="card-number">4</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">一翔</div>
+                            <div class="card-name-romaji">Kazuto</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #6 蒼汰朗 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492969857.jpg', '6', '蒼汰朗', 'Soutarou')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492969857.jpg" alt="蒼汰朗">
+                    <div class="card-info">
+                        <div class="card-number">6</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">蒼汰朗</div>
+                            <div class="card-name-romaji">Soutarou</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #8 葵 (U8) -->
+                <div class="card" onclick="openModal('選手紹介用/1773492970624.jpg', '8', '葵', 'Aoi')">
+                    <span class="age-label u8">U8</span>
+                    <img src="選手紹介用/1773492970624.jpg" alt="葵">
+                    <div class="card-info">
+                        <div class="card-number">8</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">葵</div>
+                            <div class="card-name-romaji">Aoi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #9 琉真 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492971193.jpg', '9', '琉真', 'Rihito')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492971193.jpg" alt="琉真">
+                    <div class="card-info">
+                        <div class="card-number">9</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">琉真</div>
+                            <div class="card-name-romaji">Rihito</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #10 雅空 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492971754.jpg', '10', '雅空', 'Gaku')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492971754.jpg" alt="雅空">
+                    <div class="card-info">
+                        <div class="card-number">10</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">雅空</div>
+                            <div class="card-name-romaji">Gaku</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #11 陸 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492972388.jpg', '11', '陸', 'Riku')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492972388.jpg" alt="陸">
+                    <div class="card-info">
+                        <div class="card-number">11</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">陸</div>
+                            <div class="card-name-romaji">Riku</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #14 倭 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492973077.jpg', '14', '倭', 'Yamato')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492973077.jpg" alt="倭">
+                    <div class="card-info">
+                        <div class="card-number">14</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">倭</div>
+                            <div class="card-name-romaji">Yamato</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #15 冬悟 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492973836.jpg', '15', '冬悟', 'Togo')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492973836.jpg" alt="冬悟">
+                    <div class="card-info">
+                        <div class="card-number">15</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">冬悟</div>
+                            <div class="card-name-romaji">Togo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #16 秋実 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492974186.jpg', '16', '秋実', 'Ami')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492974186.jpg" alt="秋実">
+                    <div class="card-info">
+                        <div class="card-number">16</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">秋実</div>
+                            <div class="card-name-romaji">Ami</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #17 慧 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492974802.jpg', '17', '慧', 'Kei')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492974802.jpg" alt="慧">
+                    <div class="card-info">
+                        <div class="card-number">17</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">慧</div>
+                            <div class="card-name-romaji">Kei</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #18 風雅 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492975359.jpg', '18', '風雅', 'Fuga')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492975359.jpg" alt="風雅">
+                    <div class="card-info">
+                        <div class="card-number">18</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">風雅</div>
+                            <div class="card-name-romaji">Fuga</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #19 陽太 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492975868.jpg', '19', '陽太', 'Yota')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492975868.jpg" alt="陽太">
+                    <div class="card-info">
+                        <div class="card-number">19</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">陽太</div>
+                            <div class="card-name-romaji">Yota</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #20 慎士郎 (U8) -->
+                <div class="card" onclick="openModal('選手紹介用/1773492976556.jpg', '20', '慎士郎', 'Shinjiro')">
+                    <span class="age-label u8">U8</span>
+                    <img src="選手紹介用/1773492976556.jpg" alt="慎士郎">
+                    <div class="card-info">
+                        <div class="card-number">20</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">慎士郎</div>
+                            <div class="card-name-romaji">Shinjiro</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #22 爽汰 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492977197.jpg', '22', '爽汰', 'Sota')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492977197.jpg" alt="爽汰">
+                    <div class="card-info">
+                        <div class="card-number">22</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">爽汰</div>
+                            <div class="card-name-romaji">Sota</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #24 蒼之 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492977778.jpg', '24', '蒼之', 'Soshi')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492977778.jpg" alt="蒼之">
+                    <div class="card-info">
+                        <div class="card-number">24</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">蒼之</div>
+                            <div class="card-name-romaji">Soshi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #28 然 (U8) -->
+                <div class="card" onclick="openModal('選手紹介用/1773492978418.jpg', '28', '然', 'Zen')">
+                    <span class="age-label u8">U8</span>
+                    <img src="選手紹介用/1773492978418.jpg" alt="然">
+                    <div class="card-info">
+                        <div class="card-number">28</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">然</div>
+                            <div class="card-name-romaji">Zen</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #65 凌雅 -->
+                <div class="card" onclick="openModal('選手紹介用/1773492979006.jpg', '65', '凌雅', 'Ryoga')">
+                    <span class="age-label u9">U9</span>
+                    <img src="選手紹介用/1773492979006.jpg" alt="凌雅">
+                    <div class="card-info">
+                        <div class="card-number">65</div>
+                        <div class="card-name">
+                            <div class="card-name-kanji">凌雅</div>
+                            <div class="card-name-romaji">Ryoga</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <div class="footer">
+            JACPA東京FC 2025-2026
+        </div>
+    </div>
+
+    <!-- モーダル -->
+    <div class="modal" id="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <button class="modal-nav modal-prev" onclick="prevPerson()">&larr;</button>
+        <button class="modal-nav modal-next" onclick="nextPerson()">&rarr;</button>
+        <div class="modal-content">
+            <img class="modal-image" id="modal-image" src="" alt="">
+            <div class="modal-info">
+                <div class="modal-number" id="modal-number"></div>
+                <div class="modal-name-area">
+                    <div class="modal-role" id="modal-role"></div>
+                    <div class="modal-name-kanji" id="modal-name-kanji"></div>
+                    <div class="modal-name-romaji" id="modal-name-romaji"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('modal');
+        let currentIndex = 0;
+
+        // 全メンバーのデータ
+        const members = [
+            { image: '野口監督_trimmed.jpg', number: '', name: '野口監督', romaji: '', role: '監督' },
+            { image: 'その他/川﨑コーチ.jpg', number: '', name: '川﨑コーチ', romaji: '', role: 'コーチ' },
+            { image: '選手紹介用/1773492968182.jpg', number: '2', name: '優聖', romaji: 'Yusei', role: '' },
+            { image: '選手紹介用/1773492968683.jpg', number: '3', name: '旺佑', romaji: 'Osuke', role: '' },
+            { image: '選手紹介用/1773492969258.jpg', number: '4', name: '一翔', romaji: 'Kazuto', role: '' },
+            { image: '選手紹介用/1773492969857.jpg', number: '6', name: '蒼汰朗', romaji: 'Soutarou', role: '' },
+            { image: '選手紹介用/1773492970624.jpg', number: '8', name: '葵', romaji: 'Aoi', role: '' },
+            { image: '選手紹介用/1773492971193.jpg', number: '9', name: '琉真', romaji: 'Rihito', role: '' },
+            { image: '選手紹介用/1773492971754.jpg', number: '10', name: '雅空', romaji: 'Gaku', role: '' },
+            { image: '選手紹介用/1773492972388.jpg', number: '11', name: '陸', romaji: 'Riku', role: '' },
+            { image: '選手紹介用/1773492973077.jpg', number: '14', name: '倭', romaji: 'Yamato', role: '' },
+            { image: '選手紹介用/1773492973836.jpg', number: '15', name: '冬悟', romaji: 'Togo', role: '' },
+            { image: '選手紹介用/1773492974186.jpg', number: '16', name: '秋実', romaji: 'Ami', role: '' },
+            { image: '選手紹介用/1773492974802.jpg', number: '17', name: '慧', romaji: 'Kei', role: '' },
+            { image: '選手紹介用/1773492975359.jpg', number: '18', name: '風雅', romaji: 'Fuga', role: '' },
+            { image: '選手紹介用/1773492975868.jpg', number: '19', name: '陽太', romaji: 'Yota', role: '' },
+            { image: '選手紹介用/1773492976556.jpg', number: '20', name: '慎士郎', romaji: 'Shinjiro', role: '' },
+            { image: '選手紹介用/1773492977197.jpg', number: '22', name: '爽汰', romaji: 'Sota', role: '' },
+            { image: '選手紹介用/1773492977778.jpg', number: '24', name: '蒼之', romaji: 'Soshi', role: '' },
+            { image: '選手紹介用/1773492978418.jpg', number: '28', name: '然', romaji: 'Zen', role: '' },
+            { image: '選手紹介用/1773492979006.jpg', number: '65', name: '凌雅', romaji: 'Ryoga', role: '' }
+        ];
+
+        function showMember(index) {
+            const member = members[index];
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = member.image;
+            document.getElementById('modal-number').textContent = member.number;
+            document.getElementById('modal-name-kanji').textContent = member.name;
+            document.getElementById('modal-name-romaji').textContent = member.romaji;
+            document.getElementById('modal-role').textContent = member.role;
+
+            document.getElementById('modal-number').style.display = member.number ? 'block' : 'none';
+            document.getElementById('modal-role').style.display = member.role ? 'block' : 'none';
+
+            // 野口監督の場合は左側にトリミング
+            if (member.image === '野口監督_trimmed.jpg') {
+                modalImage.classList.add('crop-left');
+            } else {
+                modalImage.classList.remove('crop-left');
+            }
+        }
+
+        function openModal(imageSrc, number, nameKanji, nameRomaji, role) {
+            // インデックスを特定
+            currentIndex = members.findIndex(m => m.image === imageSrc);
+            if (currentIndex === -1) currentIndex = 0;
+
+            showMember(currentIndex);
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        function nextPerson() {
+            currentIndex = (currentIndex + 1) % members.length;
+            showMember(currentIndex);
+        }
+
+        function prevPerson() {
+            currentIndex = (currentIndex - 1 + members.length) % members.length;
+            showMember(currentIndex);
+        }
+
+        // モーダル外クリックで閉じる
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // キーボード操作
+        document.addEventListener('keydown', (e) => {
+            if (!modal.classList.contains('active')) return;
+
+            if (e.key === 'Escape') {
+                closeModal();
+            } else if (e.key === 'ArrowRight') {
+                nextPerson();
+            } else if (e.key === 'ArrowLeft') {
+                prevPerson();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>JACPA東京FC 選手紹介 2025-2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .slideshow {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            margin: 0 auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgb(0, 100, 60);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgb(0, 80, 48);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* タイトルスライド */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            position: relative;
+        }
+
+        .title-slide .bg-logo {
+            position: absolute;
+            width: 900px;
+            height: auto;
+            opacity: 0.06;
+            z-index: 0;
+            filter: blur(1px);
+        }
+
+        .title-slide .logo {
+            width: 280px;
+            height: auto;
+            margin-bottom: 40px;
+            z-index: 1;
+        }
+
+        .title-slide .team-name {
+            font-size: 55px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .title-slide .season {
+            font-size: 30px;
+            color: #666;
+            font-family: 'Helvetica Neue', sans-serif;
+            z-index: 1;
+        }
+
+        /* 選手・スタッフスライド */
+        .player-slide {
+            display: flex;
+            background: #ffffff;
+        }
+
+        .left-panel {
+            width: 700px;
+            height: 100%;
+            background: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 70px;
+            overflow: hidden;
+        }
+
+        .left-panel .bg-logo {
+            position: absolute;
+            width: 700px;
+            height: auto;
+            opacity: 0.05;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            filter: blur(1px);
+        }
+
+        .accent-line {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 12px;
+            height: 100%;
+            background: rgb(0, 100, 60);
+        }
+
+        .player-number {
+            font-size: 320px;
+            font-weight: 900;
+            color: #1a1a1a;
+            font-family: Impact, 'Helvetica Neue', sans-serif;
+            transform: skewX(-12deg);
+            line-height: 1;
+            margin-top: 130px;
+            text-shadow: 4px 4px 0 rgb(0, 100, 60);
+            z-index: 1;
+            position: relative;
+        }
+
+        .player-name-kanji {
+            font-size: 110px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-top: 30px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .player-name-romaji {
+            font-size: 36px;
+            color: #666;
+            font-family: 'Helvetica Neue', sans-serif;
+            text-transform: uppercase;
+            margin-top: 15px;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* スタッフ用 */
+        .staff-role {
+            font-size: 50px;
+            color: #666;
+            font-weight: 300;
+            margin-top: 330px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .staff-name {
+            font-size: 90px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-top: 20px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .badge-logo {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 100px;
+            height: auto;
+            z-index: 1;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .right-panel img {
+            height: 100%;
+            width: auto;
+            object-fit: cover;
+            animation: zoomIn 4s ease-out forwards;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+
+        .slide.active .right-panel img {
+            animation: zoomIn 4s ease-out forwards;
+        }
+
+        /* ナビゲーション */
+        .nav-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #999;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .progress {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: rgb(0, 100, 60);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: #999;
+            font-size: 14px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <a href="player_list.html" class="back-btn">← 一覧に戻る</a>
+    <div class="slideshow" id="slideshow">
+        <!-- タイトル -->
+        <div class="slide title-slide active">
+            <img class="bg-logo" src="その他/logo.jpeg" alt="">
+            <img class="logo" src="その他/logo.jpeg" alt="JACPA東京FC">
+            <div class="team-name">JACPA東京FC</div>
+            <div class="season">2025-2026 SEASON</div>
+        </div>
+
+        <!-- 野口監督 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="staff-role">監督</div>
+                <div class="staff-name">野口監督</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="野口監督_trimmed.jpg" alt="野口監督">
+            </div>
+        </div>
+
+        <!-- 川﨑コーチ -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="staff-role">コーチ</div>
+                <div class="staff-name">川﨑コーチ</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="その他/川﨑コーチ.jpg" alt="川﨑コーチ">
+            </div>
+        </div>
+
+        <!-- #2 優聖 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">2</div>
+                <div class="player-name-kanji">優聖</div>
+                <div class="player-name-romaji">Yusei</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492968182.jpg" alt="優聖">
+            </div>
+        </div>
+
+        <!-- #3 旺佑 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">3</div>
+                <div class="player-name-kanji">旺佑</div>
+                <div class="player-name-romaji">Osuke</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492968683.jpg" alt="旺佑">
+            </div>
+        </div>
+
+        <!-- #4 一翔 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">4</div>
+                <div class="player-name-kanji">一翔</div>
+                <div class="player-name-romaji">Kazuto</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492969258.jpg" alt="一翔">
+            </div>
+        </div>
+
+        <!-- #6 蒼汰朗 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">6</div>
+                <div class="player-name-kanji">蒼汰朗</div>
+                <div class="player-name-romaji">Soutarou</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492969857.jpg" alt="蒼汰朗">
+            </div>
+        </div>
+
+        <!-- #8 葵 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">8</div>
+                <div class="player-name-kanji">葵</div>
+                <div class="player-name-romaji">Aoi</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492970624.jpg" alt="葵">
+            </div>
+        </div>
+
+        <!-- #9 琉真 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">9</div>
+                <div class="player-name-kanji">琉真</div>
+                <div class="player-name-romaji">Rihito</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492971193.jpg" alt="琉真">
+            </div>
+        </div>
+
+        <!-- #10 雅空 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">10</div>
+                <div class="player-name-kanji">雅空</div>
+                <div class="player-name-romaji">Gaku</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492971754.jpg" alt="雅空">
+            </div>
+        </div>
+
+        <!-- #11 陸 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">11</div>
+                <div class="player-name-kanji">陸</div>
+                <div class="player-name-romaji">Riku</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492972388.jpg" alt="陸">
+            </div>
+        </div>
+
+        <!-- #14 倭 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">14</div>
+                <div class="player-name-kanji">倭</div>
+                <div class="player-name-romaji">Yamato</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492973077.jpg" alt="倭">
+            </div>
+        </div>
+
+        <!-- #15 冬悟 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">15</div>
+                <div class="player-name-kanji">冬悟</div>
+                <div class="player-name-romaji">Togo</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492973836.jpg" alt="冬悟">
+            </div>
+        </div>
+
+        <!-- #16 秋実 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">16</div>
+                <div class="player-name-kanji">秋実</div>
+                <div class="player-name-romaji">Ami</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492974186.jpg" alt="秋実">
+            </div>
+        </div>
+
+        <!-- #17 慧 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">17</div>
+                <div class="player-name-kanji">慧</div>
+                <div class="player-name-romaji">Kei</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492974802.jpg" alt="慧">
+            </div>
+        </div>
+
+        <!-- #18 風雅 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">18</div>
+                <div class="player-name-kanji">風雅</div>
+                <div class="player-name-romaji">Fuga</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492975359.jpg" alt="風雅">
+            </div>
+        </div>
+
+        <!-- #19 陽太 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">19</div>
+                <div class="player-name-kanji">陽太</div>
+                <div class="player-name-romaji">Yota</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492975868.jpg" alt="陽太">
+            </div>
+        </div>
+
+        <!-- #20 慎士郎 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">20</div>
+                <div class="player-name-kanji">慎士郎</div>
+                <div class="player-name-romaji">Shinjiro</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492976556.jpg" alt="慎士郎">
+            </div>
+        </div>
+
+        <!-- #22 爽汰 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">22</div>
+                <div class="player-name-kanji">爽汰</div>
+                <div class="player-name-romaji">Sota</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492977197.jpg" alt="爽汰">
+            </div>
+        </div>
+
+        <!-- #24 蒼之 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">24</div>
+                <div class="player-name-kanji">蒼之</div>
+                <div class="player-name-romaji">Soshi</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492977778.jpg" alt="蒼之">
+            </div>
+        </div>
+
+        <!-- #28 然 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">28</div>
+                <div class="player-name-kanji">然</div>
+                <div class="player-name-romaji">Zen</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492978418.jpg" alt="然">
+            </div>
+        </div>
+
+        <!-- #65 凌雅 -->
+        <div class="slide player-slide">
+            <div class="left-panel">
+                <img class="bg-logo" src="その他/logo.jpeg" alt="">
+                <div class="player-number">65</div>
+                <div class="player-name-kanji">凌雅</div>
+                <div class="player-name-romaji">Ryoga</div>
+                <img class="badge-logo" src="その他/logo.jpeg" alt="Logo">
+                <div class="accent-line"></div>
+            </div>
+            <div class="right-panel">
+                <img src="選手紹介用/1773492979006.jpg" alt="凌雅">
+            </div>
+        </div>
+    </div>
+
+    <div class="progress" id="progress"></div>
+    <div class="slide-counter" id="counter">1 / 22</div>
+    <div class="nav-hint">← → キー or クリック / Space: 自動再生</div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const counter = document.getElementById('counter');
+        let currentSlide = 0;
+        let autoPlay = false;
+        let autoPlayInterval;
+        const slideTime = 4000; // 4秒
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            currentSlide = (index + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+
+            // プログレスバー更新
+            const progressWidth = ((currentSlide + 1) / slides.length) * 100;
+            progress.style.width = progressWidth + '%';
+
+            // カウンター更新
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function toggleAutoPlay() {
+            autoPlay = !autoPlay;
+            if (autoPlay) {
+                autoPlayInterval = setInterval(nextSlide, slideTime);
+            } else {
+                clearInterval(autoPlayInterval);
+            }
+        }
+
+        // キーボード操作
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                prevSlide();
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                toggleAutoPlay();
+            }
+        });
+
+        // クリック操作
+        document.addEventListener('click', (e) => {
+            if (e.clientX > window.innerWidth / 2) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        });
+
+        // 初期表示
+        showSlide(0);
+    </script>
+</body>
+</html>

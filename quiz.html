@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JACPA東京FC - これ誰？クイズ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Helvetica Neue', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ヘッダー */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header .logo {
+            width: 60px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: rgb(0, 100, 60);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* プログレス */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: rgb(0, 100, 60);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        /* クイズカード */
+        .quiz-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .quiz-image-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+        }
+
+        .quiz-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .question-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 20px 15px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        /* 選択肢 */
+        .choices {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.98);
+        }
+
+        .choice-btn .choice-label {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        .choice-btn:not(.disabled):hover {
+            border-color: rgb(0, 100, 60);
+            background: rgba(0, 100, 60, 0.03);
+        }
+
+        .choice-btn.correct {
+            border-color: rgb(0, 100, 60);
+            background: rgba(0, 100, 60, 0.1);
+            color: rgb(0, 100, 60);
+        }
+
+        .choice-btn.correct .choice-label {
+            background: rgb(0, 100, 60);
+            color: #fff;
+        }
+
+        .choice-btn.wrong {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .choice-btn.wrong .choice-label {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .choice-btn.disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        .choice-btn.correct.disabled {
+            opacity: 1;
+        }
+
+        /* フィードバック */
+        .feedback {
+            text-align: center;
+            padding: 0 20px 20px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback-text {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feedback-text.correct {
+            color: rgb(0, 100, 60);
+        }
+
+        .feedback-text.wrong {
+            color: #e74c3c;
+        }
+
+        .next-btn {
+            padding: 12px 40px;
+            background: rgb(0, 100, 60);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .next-btn:hover {
+            background: rgb(0, 80, 48);
+        }
+
+        /* スタート画面 */
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen .emoji {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .start-screen h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .start-screen p {
+            font-size: 15px;
+            color: #888;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .mode-select {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .mode-btn {
+            padding: 16px 30px;
+            border: 2px solid rgb(0, 100, 60);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.primary {
+            background: rgb(0, 100, 60);
+            color: white;
+        }
+
+        .mode-btn.primary:hover {
+            background: rgb(0, 80, 48);
+        }
+
+        .mode-btn.secondary {
+            background: white;
+            color: rgb(0, 100, 60);
+        }
+
+        .mode-btn.secondary:hover {
+            background: rgba(0, 100, 60, 0.05);
+        }
+
+        /* 結果画面 */
+        .result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-screen .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgb(0, 100, 60);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+        }
+
+        .score-circle .score-num {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .score-circle .score-total {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .result-message {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .result-sub {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .result-list {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-item img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .result-item .result-name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .result-item .result-icon {
+            font-size: 18px;
+        }
+
+        .retry-btn {
+            padding: 14px 40px;
+            background: rgb(0, 100, 60);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+
+        .retry-btn:hover {
+            background: rgb(0, 80, 48);
+        }
+
+        .home-btn {
+            padding: 14px 40px;
+            background: white;
+            color: rgb(0, 100, 60);
+            border: 2px solid rgb(0, 100, 60);
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+
+        .home-btn:hover {
+            background: rgba(0, 100, 60, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; 選手一覧に戻る</a>
+
+        <div class="header">
+            <img class="logo" src="その他/logo.jpeg" alt="JACPA東京FC">
+            <h1>これ誰？クイズ</h1>
+            <div class="subtitle">JACPA東京FC 2025-2026</div>
+        </div>
+
+        <!-- スタート画面 -->
+        <div id="start-screen" class="start-screen">
+            <div class="emoji">&#9917;</div>
+            <h2>選手の名前を覚えよう！</h2>
+            <p>写真を見て、4つの選択肢から<br>正しい名前を選んでね</p>
+            <div class="mode-select">
+                <button class="mode-btn primary" onclick="startQuiz('players')">選手だけ（19人）</button>
+                <button class="mode-btn secondary" onclick="startQuiz('all')">スタッフ込み（21人）</button>
+            </div>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" style="display:none;">
+            <div class="progress-text" id="progress-text"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="quiz-card">
+                <div class="quiz-image-wrapper">
+                    <img class="quiz-image" id="quiz-image" src="" alt="">
+                    <div class="question-label">この選手はだれ？</div>
+                </div>
+                <div class="choices" id="choices"></div>
+                <div class="feedback" id="feedback">
+                    <div class="feedback-text" id="feedback-text"></div>
+                    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次へ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="result-screen" style="display:none;"></div>
+    </div>
+
+    <script>
+        const players = [
+            { number: '2', name: '優聖', kana: 'ゆうせい', image: '選手紹介用/1773492968182.jpg' },
+            { number: '3', name: '旺佑', kana: 'おうすけ', image: '選手紹介用/1773492968683.jpg' },
+            { number: '4', name: '一翔', kana: 'かずと', image: '選手紹介用/1773492969258.jpg' },
+            { number: '6', name: '蒼汰朗', kana: 'そうたろう', image: '選手紹介用/1773492969857.jpg' },
+            { number: '8', name: '葵', kana: 'あおい', image: '選手紹介用/1773492970624.jpg' },
+            { number: '9', name: '琉真', kana: 'りひと', image: '選手紹介用/1773492971193.jpg' },
+            { number: '10', name: '雅空', kana: 'がく', image: '選手紹介用/1773492971754.jpg' },
+            { number: '11', name: '陸', kana: 'りく', image: '選手紹介用/1773492972388.jpg' },
+            { number: '14', name: '倭', kana: 'やまと', image: '選手紹介用/1773492973077.jpg' },
+            { number: '15', name: '冬悟', kana: 'とうご', image: '選手紹介用/1773492973836.jpg' },
+            { number: '16', name: '秋実', kana: 'あみ', image: '選手紹介用/1773492974186.jpg' },
+            { number: '17', name: '慧', kana: 'けい', image: '選手紹介用/1773492974802.jpg' },
+            { number: '18', name: '風雅', kana: 'ふうが', image: '選手紹介用/1773492975359.jpg' },
+            { number: '19', name: '陽太', kana: 'ようた', image: '選手紹介用/1773492975868.jpg' },
+            { number: '20', name: '慎士郎', kana: 'しんじろう', image: '選手紹介用/1773492976556.jpg' },
+            { number: '22', name: '爽汰', kana: 'そうた', image: '選手紹介用/1773492977197.jpg' },
+            { number: '24', name: '蒼之', kana: 'そうし', image: '選手紹介用/1773492977778.jpg' },
+            { number: '28', name: '然', kana: 'ぜん', image: '選手紹介用/1773492978418.jpg' },
+            { number: '65', name: '凌雅', kana: 'りょうが', image: '選手紹介用/1773492979006.jpg' }
+        ];
+
+        const staff = [
+            { number: '', name: '野口監督', romaji: '', image: '野口監督_trimmed.jpg', role: '監督' },
+            { number: '', name: '川﨑コーチ', romaji: '', image: 'その他/川﨑コーチ.jpg', role: 'コーチ' }
+        ];
+
+        let quizMembers = [];
+        let currentQ = 0;
+        let score = 0;
+        let results = [];
+        let answered = false;
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function startQuiz(mode) {
+            quizMembers = mode === 'all' ? shuffle([...staff, ...players]) : shuffle([...players]);
+            currentQ = 0;
+            score = 0;
+            results = [];
+            answered = false;
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            document.getElementById('result-screen').style.display = 'none';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answered = false;
+            const member = quizMembers[currentQ];
+            const total = quizMembers.length;
+
+            // プログレス
+            document.getElementById('progress-text').textContent = `${currentQ + 1} / ${total}`;
+            document.getElementById('progress-fill').style.width = `${((currentQ) / total) * 100}%`;
+
+            // 画像
+            document.getElementById('quiz-image').src = member.image;
+
+            // ラベル
+            const label = document.querySelector('.question-label');
+            if (member.role) {
+                label.textContent = 'この人はだれ？';
+            } else {
+                label.textContent = 'この選手はだれ？';
+            }
+
+            // 選択肢を作る（正解1 + 同カテゴリからダミー3）
+            const sameCategory = member.role ? [...staff] : [...players];
+            const wrongChoices = shuffle(sameCategory.filter(m => m.name !== member.name)).slice(0, 3);
+            const choices = shuffle([member, ...wrongChoices]);
+
+            const choicesDiv = document.getElementById('choices');
+            const labels = ['A', 'B', 'C', 'D'];
+            choicesDiv.innerHTML = choices.map((c, i) => {
+                const furigana = c.kana ? `<span style="font-size:12px; color:#999; margin-left:8px;">${c.kana}</span>` : '';
+                return `<button class="choice-btn" onclick="answer(this, '${c.name}', '${member.name}')" data-name="${c.name}">
+                    <span class="choice-label">${labels[i]}</span>
+                    ${c.name}${furigana}
+                </button>`;
+            }).join('');
+
+            // フィードバック非表示
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function answer(btn, selected, correct) {
+            if (answered) return;
+            answered = true;
+
+            const isCorrect = selected === correct;
+            if (isCorrect) score++;
+
+            results.push({
+                member: quizMembers[currentQ],
+                correct: isCorrect
+            });
+
+            // ボタンの状態更新
+            const buttons = document.querySelectorAll('.choice-btn');
+            buttons.forEach(b => {
+                b.classList.add('disabled');
+                if (b.dataset.name === correct) {
+                    b.classList.add('correct');
+                }
+                if (b === btn && !isCorrect) {
+                    b.classList.add('wrong');
+                }
+            });
+
+            // フィードバック表示
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedback-text');
+            feedback.classList.add('show');
+
+            if (isCorrect) {
+                feedbackText.textContent = '正解！';
+                feedbackText.className = 'feedback-text correct';
+            } else {
+                const correctMember = quizMembers[currentQ];
+                feedbackText.textContent = `残念... 正解は「${correctMember.name}」`;
+                feedbackText.className = 'feedback-text wrong';
+            }
+
+            // 最後の問題なら「結果を見る」
+            const nextBtn = document.getElementById('next-btn');
+            if (currentQ >= quizMembers.length - 1) {
+                nextBtn.textContent = '結果を見る';
+            } else {
+                nextBtn.textContent = '次へ';
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ >= quizMembers.length) {
+                showResult();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.style.display = 'block';
+
+            const total = quizMembers.length;
+            const pct = Math.round((score / total) * 100);
+
+            let message, sub;
+            if (pct === 100) {
+                message = 'パーフェクト！';
+                sub = 'すごい！全員覚えとるやん！';
+            } else if (pct >= 80) {
+                message = 'すごい！';
+                sub = 'ほとんど覚えとるね！';
+            } else if (pct >= 50) {
+                message = 'いい感じ！';
+                sub = 'もうちょっとで全員覚えれるよ！';
+            } else {
+                message = 'がんばろう！';
+                sub = '一覧ページで確認してもう1回やってみよう！';
+            }
+
+            // 間違えた問題のリスト
+            const wrongResults = results.filter(r => !r.correct);
+            let wrongListHTML = '';
+            if (wrongResults.length > 0) {
+                wrongListHTML = `
+                    <div class="result-list">
+                        <p style="font-size:14px; color:#888; margin-bottom:10px;">間違えた選手:</p>
+                        ${wrongResults.map(r => {
+                            const m = r.member;
+                            return `<div class="result-item">
+                                <img src="${m.image}" alt="${m.name}">
+                                <span class="result-name">${m.name}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>`;
+            }
+
+            resultScreen.innerHTML = `
+                <div class="score-circle">
+                    <div class="score-num">${score}</div>
+                    <div class="score-total">/ ${total}</div>
+                </div>
+                <div class="result-message">${message}</div>
+                <div class="result-sub">${sub}</div>
+                ${wrongListHTML}
+                <button class="retry-btn" onclick="location.reload()">もう1回やる</button>
+                <button class="home-btn" onclick="location.href='index.html'">選手一覧を見る</button>
+            `;
+        }
+    </script>
+</body>
+</html>
