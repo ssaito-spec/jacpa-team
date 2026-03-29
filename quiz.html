@@ -100,6 +100,34 @@
             display: block;
         }
 
+        .name-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgb(0, 100, 60), rgb(0, 70, 42));
+        }
+
+        .name-display-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 12px;
+        }
+
+        .name-big {
+            font-size: 52px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .name-kana {
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 6px;
+        }
+
         .question-label {
             position: absolute;
             bottom: 0;
@@ -434,6 +462,11 @@
                     <img class="quiz-image" id="quiz-image" src="" alt="">
                     <div class="question-label">この選手はだれ？</div>
                 </div>
+                <div class="name-display" id="name-display" style="display:none;">
+                    <div class="name-display-label">この選手の背番号は？</div>
+                    <div class="name-big"></div>
+                    <div class="name-kana"></div>
+                </div>
                 <div class="choices" id="choices"></div>
                 <div class="feedback" id="feedback">
                     <div class="feedback-text" id="feedback-text"></div>
@@ -514,12 +547,24 @@
             document.getElementById('progress-text').textContent = `${currentQ + 1} / ${total}`;
             document.getElementById('progress-fill').style.width = `${((currentQ) / total) * 100}%`;
 
-            // 画像
-            document.getElementById('quiz-image').src = member.image;
+            // 画像 or 名前表示
+            const imageWrapper = document.querySelector('.quiz-image-wrapper');
+            const nameDisplay = document.getElementById('name-display');
+
+            if (quizMode === 'number') {
+                imageWrapper.style.display = 'none';
+                nameDisplay.style.display = 'flex';
+                nameDisplay.querySelector('.name-big').textContent = member.name;
+                nameDisplay.querySelector('.name-kana').textContent = member.kana || '';
+            } else {
+                imageWrapper.style.display = 'block';
+                nameDisplay.style.display = 'none';
+                document.getElementById('quiz-image').src = member.image;
+            }
 
             // ラベル
             const label = document.querySelector('.question-label');
-            label.textContent = quizMode === 'number' ? '背番号は？' : 'この選手はだれ？';
+            label.textContent = 'この選手はだれ？';
 
             // 選択肢を作る（正解1 + ダミー3）
             const wrongChoices = shuffle(players.filter(m => m.name !== member.name)).slice(0, 3);
