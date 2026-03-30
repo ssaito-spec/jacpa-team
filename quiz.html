@@ -431,7 +431,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-link" id="back-link">&larr; 選手一覧に戻る</a>
+        <a href="https://ssaito-spec.github.io/jacpa-portal/" class="back-link" id="back-link">&larr; チームサイトに戻る</a>
 
         <div class="header">
             <img class="logo" src="その他/logo.jpeg" alt="JACPA東京FC">
@@ -532,8 +532,8 @@
             document.getElementById('quiz-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
             const backLink = document.getElementById('back-link');
-            backLink.href = 'index.html';
-            backLink.textContent = '\u2190 選手一覧に戻る';
+            backLink.href = 'https://ssaito-spec.github.io/jacpa-portal/';
+            backLink.textContent = '\u2190 チームサイトに戻る';
             backLink.onclick = null;
         }
 
@@ -746,7 +746,7 @@
                 ${wrongListHTML}
                 <button class="retry-btn" onclick="startQuiz(quizMode)">次の5問！</button>
                 <button class="home-btn" onclick="goToTop()">別のクイズ</button>
-                <button class="home-btn" onclick="location.href='index.html'" style="margin-top:5px;">選手一覧に戻る</button>
+                <button class="home-btn" onclick="location.href='https://ssaito-spec.github.io/jacpa-portal/'" style="margin-top:5px;">チームサイトに戻る</button>
             `;
         }
     </script>
